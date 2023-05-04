@@ -5,7 +5,7 @@
 #include "tlv.hpp"
 #include "ndn-cxx/util/logger.hpp"
 
-NDN_LOG_INIT(ndn_repo_client.command_checker);
+
 
 using CheckCallback = std::function<void(ndn_repo_client::RepoCommandRes)>;
 

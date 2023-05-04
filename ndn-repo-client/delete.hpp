@@ -15,7 +15,7 @@
 #include <command_checker.hpp>
 
 
-NDN_LOG_INIT(ndn_repo_client.delete);
+
 
 using DeleteCallback = std::function<void(bool)>;
 

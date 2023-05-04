@@ -1,5 +1,7 @@
 #include "putData.hpp"
 
+NDN_LOG_INIT(ndn_repo_client.putData);
+
 PutDataClient::PutDataClient(ndn::Face& face, const ndn::Name& prefix, const ndn::Name& repo_name,ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo, ndn::Name forwardingHint,size_t imsLimit)
     :m_face(face),
      m_keyChain(keyChain),

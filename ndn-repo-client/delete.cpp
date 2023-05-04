@@ -1,5 +1,7 @@
 #include "delete.hpp"
 
+NDN_LOG_INIT(ndn_repo_client.delete);
+
 DeleteClient::DeleteClient(ndn::Face &face, ndn::Name prefix, ndn::Name repo_name)
     :m_face(face),
     m_prefix(prefix),

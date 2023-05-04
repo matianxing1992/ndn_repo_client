@@ -11,7 +11,7 @@
 #include <ndn-cxx/util/segment-fetcher.hpp>
 #include <ndn-cxx/security/validator-null.hpp>
 
-NDN_LOG_INIT(ndn_repo_client.getData);
+
 
 
 using FetchedDataCallback = std::function<void(ndn::span<const uint8_t>)>;

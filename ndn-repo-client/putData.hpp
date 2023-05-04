@@ -16,7 +16,7 @@
 #include <command_checker.hpp>
 
 
-NDN_LOG_INIT(ndn_repo_client.putData);
+
 
 
 using ResultCallback = std::function<void(bool)>;

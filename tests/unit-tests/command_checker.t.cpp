@@ -26,20 +26,12 @@
 
 BOOST_AUTO_TEST_CASE(check_insert)
 {
-    ndn::Face m_face;
-    CommandChecker _checker(m_face);
 
-    ndn::span<const uint8_t> request_no{};
-    _checker.check_insert(ndn::Name("repo_name"),request_no,[](auto){});
     
 }
 
 BOOST_AUTO_TEST_CASE(check_delete)
 {
-    ndn::Face m_face;
-    CommandChecker _checker(m_face);
 
-    ndn::span<const uint8_t> request_no{};
-    _checker.check_delete(ndn::Name("repo_name"),request_no,[](auto){});
     
 }

@@ -1,5 +1,7 @@
 #include "getData.hpp"
 
+NDN_LOG_INIT(ndn_repo_client.getData);
+
 GetDataClient::GetDataClient(ndn::Face &face, ndn::Name repo_name)
     :m_face(face),
     m_repo_name(repo_name)

@@ -22,6 +22,14 @@ main(int argc, char* argv[])
     ndn::Block data = ndn::makeStringBlock(ndn::tlv::Data,"Put data object into the repo");
 
     ndn::Face m_face;
+
+    auto run = [&]()
+    {
+        m_face.processEvents();
+    };
+    std::thread thread_object(run);
+    
+
     ndn::Scheduler m_scheduler{m_face.getIoService()};
     ndn::Name m_client_name("client_name");
     ndn::Name m_repo_name("testrepo");
@@ -63,7 +71,6 @@ main(int argc, char* argv[])
     _checker.check_delete(m_repo_name,request_no_1,[&](ndn_repo_client::RepoCommandRes res){
       NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
     });
-
 
   }
   catch (const std::exception& e) {

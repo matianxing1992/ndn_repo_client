@@ -61,7 +61,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::Block(ndn_repo_client::FORWARDING_HINT_TYPE,m_name.wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -107,7 +107,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::Block(ndn_repo_client::REGISTER_PREFIX_TYPE,m_name.wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -151,7 +151,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::START_BLOCK_ID_TYPE,m_startBlockId);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -195,7 +195,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::END_BLOCK_ID_TYPE,m_endBlockId);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -240,7 +240,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::STATUS_CODE_TYPE,m_statusCode);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -283,7 +283,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::INSERT_NUM_TYPE,m_insertNum);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -326,7 +326,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::DELETE_NUM_TYPE,m_deleteNum);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -369,7 +369,7 @@ namespace ndn_repo_client
             }
             m_wire = ndn::makeBinaryBlock(ndn_repo_client::REQUEST_NO_TYPE,m_requestNo);
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -397,24 +397,28 @@ namespace ndn_repo_client
             // m_forwardingHint(forwardingHint)
         {
             if(forwardingHint!=nullptr){
-                m_forwardingHint=&ForwardingHint(forwardingHint);
+                ForwardingHint tmp_0(forwardingHint);
+                m_forwardingHint=&tmp_0;
             }else{
                 m_forwardingHint=nullptr;
             }
-            if(startBlockId!=-1){
-                m_startBlockId=&StartBlockId(startBlockId);
+            if(startBlockId!=(uint64_t)-1){
+                StartBlockId tmp_1(startBlockId);
+                m_startBlockId=&tmp_1;
             }
             else{
                 m_startBlockId=nullptr;
             }
-            if(endBlockId!=-1){
-                m_endBlockId=&EndBlockId(endBlockId);
+            if(endBlockId!=(uint64_t)-1){
+                EndBlockId tmp_2(endBlockId);
+                m_endBlockId=&tmp_2;
             }
             else{
                 m_endBlockId=nullptr;
             }
             if(registerPrefix!=nullptr){
-                m_registerPrefix=&RegisterPrefix(registerPrefix);
+                RegisterPrefix tmp_3(registerPrefix);
+                m_registerPrefix=&tmp_3;
             }
             else{
                 m_registerPrefix=nullptr;
@@ -441,7 +445,7 @@ namespace ndn_repo_client
             if(m_endBlockId!=nullptr)m_wire.push_back(m_endBlockId->wireEncode());
             if(m_registerPrefix!=nullptr)m_wire.push_back(m_registerPrefix->wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -455,16 +459,20 @@ namespace ndn_repo_client
                     m_name = ndn::Name(*it);
                 }
                 if (it->type() == ndn_repo_client::FORWARDING_HINT_TYPE) {
-                    m_forwardingHint = &ForwardingHint(*it);
+                    ForwardingHint tmp_0(*it);
+                    m_forwardingHint = &tmp_0;
                 }
                 if (it->type() == ndn_repo_client::START_BLOCK_ID_TYPE) {
-                    m_startBlockId = &StartBlockId(*it);
+                    StartBlockId tmp_1(*it);
+                    m_startBlockId = &tmp_1;
                 }
                 if (it->type() == ndn_repo_client::END_BLOCK_ID_TYPE) {
-                    m_endBlockId = &EndBlockId(*it);
+                    EndBlockId tmp_2(*it);
+                    m_endBlockId = &tmp_2;
                 }
-                if (it->type() == ndn_repo_client::FORWARDING_HINT_TYPE) {
-                    m_forwardingHint = &ForwardingHint(*it);
+                if (it->type() == ndn_repo_client::REGISTER_PREFIX_TYPE) {
+                    RegisterPrefix tmp_3(*it);
+                    m_registerPrefix = &tmp_3;
                 }
             }
             // m_requestNo = wire.value_bytes();
@@ -494,14 +502,16 @@ namespace ndn_repo_client
             m_statusCode(statusCode)
         {
 
-            if(insertNum!=-1){
-                m_insertNum=&InsertNum(insertNum);
+            if(insertNum!=(uint64_t)-1){
+                InsertNum tmp_0(insertNum);
+                m_insertNum=&tmp_0;
             }
             else{
                 m_insertNum=nullptr;
             }
-            if(deleteNum!=-1){
-                m_deleteNum=&DeleteNum(deleteNum);
+            if(deleteNum!=(uint64_t)-1){
+                DeleteNum tmp_1(deleteNum);
+                m_deleteNum=&tmp_1;
             }
             else{
                 m_deleteNum=nullptr;
@@ -528,7 +538,7 @@ namespace ndn_repo_client
             if(m_deleteNum!=nullptr)m_wire.push_back(m_deleteNum->wireEncode());
 
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -545,10 +555,12 @@ namespace ndn_repo_client
                     m_statusCode = StatusCode(*it);
                 }
                 if (it->type() == ndn_repo_client::INSERT_NUM_TYPE) {
-                    m_insertNum = &InsertNum(*it);
+                    InsertNum tmp_0(*it);
+                    m_insertNum=&tmp_0;
                 }
                 if (it->type() == ndn_repo_client::DELETE_NUM_TYPE) {
-                    m_deleteNum = &DeleteNum(*it);
+                    DeleteNum tmp_1(*it);
+                    m_deleteNum=&tmp_1;
                 }
             }
         }
@@ -590,7 +602,7 @@ namespace ndn_repo_client
             for(auto objectParam:m_objectParams)
                 m_wire.push_back(objectParam.wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -642,7 +654,7 @@ namespace ndn_repo_client
             for(auto objectResult:m_objectResults)
                 m_wire.push_back(objectResult.wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {
@@ -695,7 +707,7 @@ namespace ndn_repo_client
             m_wire=ndn::Block(ndn_repo_client::REPO_STAT_QUERY);
             m_wire.push_back(m_requestNo.wireEncode());
             return m_wire;
-        };
+        }
 
         void wireDecode(const ndn::Block& wire)
         {

@@ -12,7 +12,7 @@
 #include "ndn-cxx/util/segmenter.hpp"
 
 
-NDN_LOG_INIT(ndn_repo_client.pubsub);
+
 
 using SubscribeCallback = std::function<void()>;
 

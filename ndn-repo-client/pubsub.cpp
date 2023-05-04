@@ -1,5 +1,6 @@
 #include "pubsub.hpp"
 
+NDN_LOG_INIT(ndn_repo_client.pubsub);
 
 template <std::size_t N>
 void generateInitVector(uint8_t (&IV_buff)[N])

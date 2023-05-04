@@ -1,5 +1,7 @@
 #include "command_checker.hpp"
 
+NDN_LOG_INIT(ndn_repo_client.command_checker);
+
 CommandChecker::CommandChecker(ndn::Face &face)
     :m_face(face)
 {
