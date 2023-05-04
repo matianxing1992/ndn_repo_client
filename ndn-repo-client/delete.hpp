@@ -1,0 +1,53 @@
+#ifndef NDN_REPO_CLIENT_DELETE_HPP
+#define NDN_REPO_CLIENT_DELETE_HPP
+
+#include "tlv.hpp"
+
+
+#include <ndn-cxx/face.hpp>
+#include "tlv.hpp"
+#include "ndn-cxx/util/logger.hpp"
+#include <ndn-cxx/util/segmenter.hpp>
+#include <ndn-cxx/ims/in-memory-storage-fifo.hpp>
+#include <pubsub.hpp>
+#include <ndn-cxx/util/segment-fetcher.hpp>
+#include <ndn-cxx/security/validator-null.hpp>
+#include <command_checker.hpp>
+
+
+NDN_LOG_INIT(ndn_repo_client.delete);
+
+using DeleteCallback = std::function<void(bool)>;
+
+class DeleteClient
+{
+public:
+    // A client to delete data in the repo
+    DeleteClient(ndn::Face& face, ndn::Name prefix, ndn::Name repo_name);
+
+
+    //Delete from repo packets between "<name_at_repo>/<start_block_id>" and\
+            "<name_at_repo>/<end_block_id>" inclusively.
+    //:param register_prefix: If repo is configured with ``register_root=False``, it unregisters\
+            ``register_prefix`` after receiving the deletion command.
+    //   :param check_prefix: NonStrictName. The repo will publish process check messages under\
+            ``<check_prefix>/check``. It is necessary to specify this value in the param, instead\
+            of using a predefined prefix, to make sure the subscriber can register this prefix\
+            under the NDN prefix registration security model. If not specified, default value is\
+            the client prefix.
+    // return request_no
+    ndn::span<const uint8_t> delete_object(ndn::Name name_at_repo,DeleteCallback _callback, uint64_t startBlockId=0,uint64_t endBlockId=-1,ndn::Name register_prefix=nullptr,ndn::Name check_prefix=nullptr);
+
+
+
+private:
+    ndn::Face& m_face;
+    ndn::Name m_prefix;
+    ndn::Name m_repo_name;
+
+    PubSub pubSub;
+    CommandChecker commandChecker;
+};
+
+
+#endif

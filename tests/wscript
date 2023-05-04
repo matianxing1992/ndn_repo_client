@@ -1,0 +1,19 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+top = '../'
+
+def build(bld):
+    # unit test objects
+    srcFiles = bld.path.ant_glob('**/*.cpp', excl=['main.cpp'])
+
+    bld.objects(target='unit-tests-objects',
+                source=srcFiles,
+                use='tests-common ndn-repo-client',
+                )
+
+    # unit test binary
+    bld.program(target=top + 'unit-tests',
+                name='unit-tests',
+                source=['main.cpp'],
+                use='unit-tests-objects',
+                install_path=None)
