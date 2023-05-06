@@ -2,28 +2,34 @@
 
 NDN_LOG_INIT(ndn_repo_client.delete);
 
-DeleteClient::DeleteClient(ndn::Face &face, ndn::Name prefix, ndn::Name repo_name)
+DeleteClient::DeleteClient(ndn::Face &face, ndn::Name& prefix, ndn::Name& repo_name)
     :m_face(face),
     m_prefix(prefix),
     m_repo_name(repo_name),
-    pubSub(m_face,prefix),
+    pubSub(m_face,m_prefix),
     commandChecker(m_face)
 {
+    NDN_LOG_TRACE("Init DeleteClient");
 }
 
-ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, DeleteCallback _callback, uint64_t startBlockId, uint64_t endBlockId, ndn::Name register_prefix, ndn::Name check_prefix)
+ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId, uint64_t endBlockId)
 {
     // send command interest
-    ndn_repo_client::ObjectParam objectParam(name_at_repo,nullptr,startBlockId,endBlockId,register_prefix);
-    std::vector<ndn_repo_client::ObjectParam> objectParams;
-    objectParams.push_back(objectParam);
+    ndn_repo_client::ObjectParam objectParam(name_at_repo,nullptr,startBlockId,endBlockId,&register_prefix);
+    std::shared_ptr<ndn_repo_client::ObjectParam> objectParam_ptr=std::make_shared<ndn_repo_client::ObjectParam>(objectParam);
+    NDN_LOG_TRACE("construct delete cmd msg: ObjectParam");
+
+    std::vector<std::shared_ptr<ndn_repo_client::ObjectParam>> objectParams;
+    objectParams.push_back(objectParam_ptr);
+    
     ndn_repo_client::RepoCommandParam repoCommandParam(objectParams);
+    NDN_LOG_TRACE("construct delete cmd msg: RepoCommandParam");
 
     // The request number of the command is always the SHA256 hash of the command data published in Pub-Sub
     ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
     auto request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
     ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->data(),request_no_buffer->size());
-
+    NDN_LOG_TRACE("Request_no of the request : " << request_no_buffer);
 
     pubSub.publish(m_repo_name.append(ndn::Name("delete")),repoCommandParamBytes,
         [&](auto isSuccess){

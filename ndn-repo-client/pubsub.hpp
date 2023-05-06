@@ -21,13 +21,13 @@ using PublishCallback = std::function<void(bool)>;
 class PubSub
 {
 public:
-    PubSub(ndn::Face& face,ndn::Name prefix, ndn::Name forwarding_hint = nullptr,  int ims_limit=6000);
+    PubSub(ndn::Face& face,ndn::Name prefix, ndn::Name* forwarding_hint = nullptr,  int ims_limit=6000);
 
 private:
     void expressNotifyInterest(int n_retries, ndn::Interest notifyInterest, PublishCallback publishCallback);
 
 public:  
-    void publish(ndn::Name topic, ndn::span<const uint8_t> msg, PublishCallback publishCallback);
+    void publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCallback publishCallback);
 
     void subscribe(ndn::Name topic, SubscribeCallback cb);
 
@@ -36,7 +36,7 @@ public:
 private:
     ndn::Face& m_face;
     ndn::Name m_publisher_prefix;
-    ndn::Name m_forwarding_hint;
+    ndn::Name* m_forwarding_hint;
 
     ndn::KeyChain m_keyChain;
     ndn::InMemoryStorageFifo m_published_data;

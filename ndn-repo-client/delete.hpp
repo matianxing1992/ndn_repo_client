@@ -23,7 +23,7 @@ class DeleteClient
 {
 public:
     // A client to delete data in the repo
-    DeleteClient(ndn::Face& face, ndn::Name prefix, ndn::Name repo_name);
+    DeleteClient(ndn::Face& face, ndn::Name& prefix, ndn::Name& repo_name);
 
 
     //Delete from repo packets between "<name_at_repo>/<start_block_id>" and\
@@ -36,7 +36,7 @@ public:
             under the NDN prefix registration security model. If not specified, default value is\
             the client prefix.
     // return request_no
-    ndn::span<const uint8_t> delete_object(ndn::Name name_at_repo,DeleteCallback _callback, uint64_t startBlockId=0,uint64_t endBlockId=-1,ndn::Name register_prefix=nullptr,ndn::Name check_prefix=nullptr);
+    ndn::span<const uint8_t> delete_object(ndn::Name name_at_repo,DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId=(uint64_t)0,uint64_t endBlockId=(uint64_t)-1);
 
 
 

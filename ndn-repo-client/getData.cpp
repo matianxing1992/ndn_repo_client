@@ -6,6 +6,7 @@ GetDataClient::GetDataClient(ndn::Face &face, ndn::Name repo_name)
     :m_face(face),
     m_repo_name(repo_name)
 {
+    NDN_LOG_TRACE("Init GetDataClient");
 }
 
 void GetDataClient::fetch_object(ndn::Name name_at_repo, FetchedDataCallback onFetchedData)

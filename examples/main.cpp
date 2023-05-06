@@ -8,6 +8,8 @@
 #include <ndn-cxx/util/random.hpp>
 #include <ndn-cxx/util/scheduler.hpp>
 
+#include "ndn-cxx/security/signing-helpers.hpp"
+
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -19,28 +21,31 @@ int
 main(int argc, char* argv[])
 {
   try {
-    ndn::Block data = ndn::makeStringBlock(ndn::tlv::Data,"Put data object into the repo");
+    auto data_ptr=std::make_shared<ndn::Block>(ndn::makeStringBlock(ndn::tlv::Data,"Put data object into the repo"));
 
     ndn::Face m_face;
 
-    auto run = [&]()
-    {
-        m_face.processEvents();
+    auto run=[&](){
+      m_face.processEvents();
     };
-    std::thread thread_object(run);
-    
+    std::thread thread_run(run);
 
     ndn::Scheduler m_scheduler{m_face.getIoService()};
     ndn::Name m_client_name("client_name");
     ndn::Name m_repo_name("testrepo");
     ndn::KeyChain m_keyChain;
-    PutDataClient m_putDataClient(m_face,m_client_name,m_repo_name,m_keyChain);
+    auto identity = m_keyChain.createIdentity(ndn::Name("ndn_repo_client"));
+    m_keyChain.setDefaultIdentity(identity);
+    NDN_LOG_TRACE("Default identity: "<< m_keyChain.getPib().getDefaultIdentity());
 
-    ndn::Name name_at_repo=m_repo_name.append(ndn::Name("Object_0"));
+    PutDataClient m_putDataClient(m_face,m_client_name,m_repo_name,m_keyChain,ndn::signingByIdentity(identity));
+
+    ndn::Name name_at_repo=ndn::Name("testrepo").append(ndn::Name("Object_0"));
 
     NDN_LOG_TRACE("PutDataClient: Put data object into the repo");
-    auto request_no = m_putDataClient.insert_object(data.value_bytes(),name_at_repo,ndn::MAX_NDN_PACKET_SIZE>>1,ndn::time::milliseconds(600000),1,
-      [&](auto){},nullptr,nullptr,nullptr);
+    auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data_ptr->value_bytes());
+    auto request_no = m_putDataClient.insert_object(data_bytes,name_at_repo,1024,ndn::time::milliseconds(600000),1,
+      [&](auto){},nullptr,m_repo_name,m_client_name);
 
     NDN_LOG_TRACE("Wait for 5s");
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
@@ -63,7 +68,7 @@ main(int argc, char* argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
     DeleteClient m_deleteClient(m_face,m_client_name,m_repo_name);
-    auto request_no_1 = m_deleteClient.delete_object(name_at_repo,[&](bool){});
+    auto request_no_1 = m_deleteClient.delete_object(name_at_repo,[&](bool){},m_repo_name,m_client_name,(uint64_t)0,(uint64_t)-1);
 
     NDN_LOG_TRACE("Wait for 5s");
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
@@ -72,8 +77,16 @@ main(int argc, char* argv[])
       NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
     });
 
+    thread_run.join();
+
+    
+
+    return 0;
+
   }
   catch (const std::exception& e) {
     NDN_LOG_ERROR(e.what());
+    return 1;
   }
+
 }

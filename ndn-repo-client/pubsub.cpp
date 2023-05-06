@@ -12,11 +12,12 @@ void generateInitVector(uint8_t (&IV_buff)[N])
     std::generate(std::begin(IV_buff), std::end(IV_buff), std::ref(bytes));
 }
 
-PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name forwarding_hint, int ims_limit)
+PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, int ims_limit)
     : m_face(face),
-    m_published_data(ims_limit)
+    m_published_data(ims_limit),
+    m_publisher_prefix(prefix)
 {
-    m_publisher_prefix = prefix;
+    NDN_LOG_TRACE("Init pubsub");
     m_forwarding_hint = forwarding_hint;
     m_face.setInterestFilter(m_publisher_prefix,
         [&](const ndn::InterestFilter&, const ndn::Interest& interest){
@@ -64,7 +65,7 @@ void PubSub::expressNotifyInterest(int n_retries, ndn::Interest notifyInterest, 
 
 }
 
-void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t> msg, PublishCallback publishCallback)
+void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCallback publishCallback)
 {
     NDN_LOG_TRACE("publishing a message to topic: " << topic.toUri());
     // generate a nonce for each message. Nonce is a random sequence of bytes
@@ -96,7 +97,7 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t> msg, PublishCallb
 
     if(m_forwarding_hint!=nullptr)
     {
-        ndn::Block b3 = ndn::encoding::makeBinaryBlock(ndn_repo_client::PUBLISHER_FWD_HINT_TYPE,m_forwarding_hint.wireEncode());
+        ndn::Block b3 = ndn::encoding::makeBinaryBlock(ndn_repo_client::PUBLISHER_FWD_HINT_TYPE,m_forwarding_hint->wireEncode());
         applicationParameters.push_back(b3);
     }
 

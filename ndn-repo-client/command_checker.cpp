@@ -5,7 +5,7 @@ NDN_LOG_INIT(ndn_repo_client.command_checker);
 CommandChecker::CommandChecker(ndn::Face &face)
     :m_face(face)
 {
-    
+    NDN_LOG_TRACE("Init CommandChecker");
 }
 
 void CommandChecker::check_insert(ndn::Name repo_name, ndn::span<const uint8_t> request_no, CheckCallback _callback)
