@@ -23,12 +23,11 @@ main(int argc, char* argv[])
   try {
     auto data_ptr=std::make_shared<ndn::Block>(ndn::makeStringBlock(ndn::tlv::Data,"Put data object into the repo"));
 
-    ndn::Face m_face;
+    ndn::Face m_face("127.0.0.1");
 
     auto run=[&](){
       m_face.processEvents();
     };
-    std::thread thread_run(run);
 
     ndn::Scheduler m_scheduler{m_face.getIoService()};
     ndn::Name m_client_name("client_name");
@@ -40,7 +39,9 @@ main(int argc, char* argv[])
 
     PutDataClient m_putDataClient(m_face,m_client_name,m_repo_name,m_keyChain,ndn::signingByIdentity(identity));
 
-    ndn::Name name_at_repo=ndn::Name("testrepo").append(ndn::Name("Object_0"));
+    std::thread thread_run(run);
+    
+    ndn::Name name_at_repo=ndn::Name("client_name").append(ndn::Name("Object_0"));
 
     NDN_LOG_TRACE("PutDataClient: Put data object into the repo");
     auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data_ptr->value_bytes());
@@ -50,10 +51,10 @@ main(int argc, char* argv[])
     NDN_LOG_TRACE("Wait for 5s");
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
-    CommandChecker _checker(m_face);
-    _checker.check_insert(m_repo_name,request_no,[&](ndn_repo_client::RepoCommandRes res){
-      NDN_LOG_TRACE("Check insert status code: "<< res.m_statusCode.m_statusCode);
-    });
+    // CommandChecker _checker(m_face);
+    // _checker.check_insert(m_repo_name,request_no,[&](ndn_repo_client::RepoCommandRes res){
+    //   NDN_LOG_TRACE("Check insert status code: "<< res.m_statusCode.m_statusCode);
+    // });
 
     NDN_LOG_TRACE("Wait for 1s");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -73,9 +74,9 @@ main(int argc, char* argv[])
     NDN_LOG_TRACE("Wait for 5s");
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
-    _checker.check_delete(m_repo_name,request_no_1,[&](ndn_repo_client::RepoCommandRes res){
-      NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
-    });
+    // _checker.check_delete(m_repo_name,request_no_1,[&](ndn_repo_client::RepoCommandRes res){
+    //   NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
+    // });
 
     thread_run.join();
 

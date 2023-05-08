@@ -14,8 +14,8 @@ void generateInitVector(uint8_t (&IV_buff)[N])
 
 PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, int ims_limit)
     : m_face(face),
-    m_published_data(ims_limit),
-    m_publisher_prefix(prefix)
+    m_publisher_prefix(prefix),
+    m_published_data(ims_limit)
 {
     NDN_LOG_TRACE("Init pubsub");
     m_forwarding_hint = forwarding_hint;
@@ -73,10 +73,12 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     generateInitVector(nonce);
     // wrap msg in a data packet named /<publisher_prefix>/msg/<topic>/nonce
     ndn::Name dataName(m_publisher_prefix);
-    dataName.append("msg").append(topic).append(nonce);
+
+    dataName.append("msg").append(topic).append(ndn::name::Component(nonce));
     NDN_LOG_TRACE("Packet Name: " << dataName.toUri());
 
-    auto data = std::make_shared<ndn::Data>(dataName);
+    auto data = std::make_shared<ndn::Data>(ndn::Data(dataName));
+    data->setContentType(ndn::tlv::ContentType_Blob);
     data->setContent(msg);
     m_keyChain.sign(*data);
     data->wireEncode();
@@ -90,7 +92,8 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     //applicationParameters
     //publisher_prefix type ndn::tlv::Name; notify_nonce type 128
     ndn::Block applicationParameters(ndn::tlv::ApplicationParameters);
-    ndn::Block b1 = ndn::encoding::makeStringBlock(ndn::tlv::Name,m_publisher_prefix.toUri());
+
+    ndn::Block b1(m_publisher_prefix.wireEncode());
     ndn::Block b2 = ndn::encoding::makeBinaryBlock(ndn_repo_client::NOTIFY_NONCE_TYPE,nonce);
     applicationParameters.push_back(b1);
     applicationParameters.push_back(b2);

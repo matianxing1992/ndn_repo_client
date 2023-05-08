@@ -36,7 +36,7 @@ ndn::span<const uint8_t> PutDataClient::insert_object(std::shared_ptr<ndn::span<
     NDN_LOG_TRACE("create segments of the object : " << name_at_repo.toUri());
     for (auto segment:segments)
         m_ims.insert(*segment,ndn::time::milliseconds(600000));
-    NDN_LOG_TRACE("insert into local in-memory-storage " << name_at_repo.toUri());
+    NDN_LOG_TRACE("insert into local in-memory-storage " << segments.at(0)->getName().toUri());
     int num_packets=segments.size();
 
 
@@ -69,9 +69,10 @@ ndn::span<const uint8_t> PutDataClient::insert_object(std::shared_ptr<ndn::span<
     NDN_LOG_TRACE("construct insert cmd msg: RepoCommandParam");
 
     // The request number of the command is always the SHA256 hash of the command data published in Pub-Sub
-    ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
+    // ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
+    ndn::span<const uint8_t> repoCommandParamBytes(objectParam_ptr->wireEncode());
     auto request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
-    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->data(),request_no_buffer->size());
+    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
     NDN_LOG_TRACE("Request_no of the request : " << request_no_buffer);
 
     pubSub.publish(m_repo_name.append(ndn::Name("insert")),repoCommandParamBytes,

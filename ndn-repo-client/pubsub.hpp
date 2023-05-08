@@ -18,6 +18,7 @@ using SubscribeCallback = std::function<void()>;
 
 using PublishCallback = std::function<void(bool)>;
 
+// Only publisher now
 class PubSub
 {
 public:

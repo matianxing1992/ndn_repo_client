@@ -441,6 +441,7 @@ namespace ndn_repo_client
             if(m_startBlockId.get()!=nullptr)m_wire.push_back(m_startBlockId->wireEncode());
             if(m_endBlockId.get()!=nullptr)m_wire.push_back(m_endBlockId->wireEncode());
             if(m_registerPrefix.get()!=nullptr)m_wire.push_back(m_registerPrefix->wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 
@@ -526,7 +527,7 @@ namespace ndn_repo_client
 
             if(m_insertNum.get()!=nullptr)m_wire.push_back(m_insertNum->wireEncode());
             if(m_deleteNum.get()!=nullptr)m_wire.push_back(m_deleteNum->wireEncode());
-
+            m_wire.encode();
             return m_wire;
         }
 
@@ -572,7 +573,7 @@ namespace ndn_repo_client
 
         RepoCommandParam(std::vector<std::shared_ptr<ndn_repo_client::ObjectParam>>& objectParams)
         {
-            m_objectParams = std::make_shared<std::vector<std::shared_ptr<ndn_repo_client::ObjectParam>>>(objectParams);
+            m_objectParams = objectParams;
             wireEncode();
         }
 
@@ -587,8 +588,9 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire=ndn::Block(ndn_repo_client::REPO_COMMAND_PARAM);
-            for(auto objectParam : *m_objectParams)
+            for(auto objectParam : m_objectParams)
                 m_wire.push_back(objectParam->wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 
@@ -599,16 +601,16 @@ namespace ndn_repo_client
             }
             wire.parse();
             m_wire = wire;
-            m_objectParams->clear();
+            m_objectParams.clear();
             for (auto it = m_wire.elements_begin(); it != m_wire.elements_end(); ++it) {
                 if (it->type() == ndn_repo_client::OBJECT_PARAM_TYPE) {
-                    m_objectParams->push_back(std::make_shared<ndn_repo_client::ObjectParam>(ndn_repo_client::ObjectParam(*it)));
+                    m_objectParams.push_back(std::make_shared<ndn_repo_client::ObjectParam>(ndn_repo_client::ObjectParam(*it)));
                 }
             }
         }
 
     public:
-        std::shared_ptr<std::vector<std::shared_ptr<ndn_repo_client::ObjectParam>>> m_objectParams;
+        std::vector<std::shared_ptr<ndn_repo_client::ObjectParam>> m_objectParams;
 
     private:
         mutable ndn::Block m_wire;
@@ -642,6 +644,7 @@ namespace ndn_repo_client
             m_wire.push_back(m_statusCode.wireEncode());
             for(auto objectResult:*m_objectResults)
                 m_wire.push_back(objectResult.wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 
@@ -695,6 +698,7 @@ namespace ndn_repo_client
             }
             m_wire=ndn::Block(ndn_repo_client::REPO_STAT_QUERY);
             m_wire.push_back(m_requestNo.wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 

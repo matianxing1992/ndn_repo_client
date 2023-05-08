@@ -26,9 +26,10 @@ ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, Del
     NDN_LOG_TRACE("construct delete cmd msg: RepoCommandParam");
 
     // The request number of the command is always the SHA256 hash of the command data published in Pub-Sub
-    ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
+    // ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
+    ndn::span<const uint8_t> repoCommandParamBytes(objectParam_ptr->wireEncode());
     auto request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
-    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->data(),request_no_buffer->size());
+    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
     NDN_LOG_TRACE("Request_no of the request : " << request_no_buffer);
 
     pubSub.publish(m_repo_name.append(ndn::Name("delete")),repoCommandParamBytes,
