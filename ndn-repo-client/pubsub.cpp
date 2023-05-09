@@ -15,7 +15,8 @@ void generateInitVector(uint8_t (&IV_buff)[N])
 PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, int ims_limit)
     : m_face(face),
     m_publisher_prefix(prefix),
-    m_published_data(ims_limit)
+    m_published_data(ims_limit),
+    m_rng(ndn::random::getRandomNumberEngine())
 {
     NDN_LOG_TRACE("Init pubsub");
     m_forwarding_hint = forwarding_hint;
@@ -42,16 +43,16 @@ void PubSub::expressNotifyInterest(int n_retries, const ndn::Interest& notifyInt
     if(n_retries>=0)
     {
         m_face.expressInterest(notifyInterest,
-        [&](const ndn::Interest& interest, const ndn::Data&)
+        [&,publishCallback](const ndn::Interest& interest, const ndn::Data&)
         {
             publishCallback(true);
             NDN_LOG_TRACE("publish succeeded " << interest.toUri());
         },
-        [&](const ndn::Interest& interest, const ndn::lp::Nack&)
+        [&,publishCallback](const ndn::Interest& interest, const ndn::lp::Nack&)
         {
             expressNotifyInterest(n_retries,interest,publishCallback);
         },
-        [&](const ndn::Interest& interest)
+        [&,publishCallback](const ndn::Interest& interest)
         {
             expressNotifyInterest(n_retries,interest,publishCallback);
         });
@@ -70,11 +71,13 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     NDN_LOG_TRACE("publishing a message to topic: " << topic.toUri());
     // generate a nonce for each message. Nonce is a random sequence of bytes
     uint8_t nonce[4];
-    generateInitVector(nonce);
+    ndn::span<uint8_t> buffer(nonce);
+    ndn::random::generateSecureBytes(buffer);
+    // generateInitVector(nonce);
     // wrap msg in a data packet named /<publisher_prefix>/msg/<topic>/nonce
     ndn::Name dataName(m_publisher_prefix);
 
-    dataName.append("msg").append(topic).append(ndn::name::Component(nonce));
+    dataName.append("msg").append(topic).append(ndn::name::Component(buffer));
     NDN_LOG_TRACE("Packet Name: " << dataName.toUri());
 
     auto data = std::make_shared<ndn::Data>(ndn::Data(dataName));
@@ -105,11 +108,11 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     }
 
     notifyInterest.setApplicationParameters(applicationParameters);
-    // notifyInterest.setInterestLifetime(ndn::time::milliseconds(10000));
+    notifyInterest.setInterestLifetime(ndn::time::milliseconds(10000));
 
     NDN_LOG_TRACE("NotifyInterest : " << notifyInterest.toUri());
     
     // express notify interest, will retry for n_retries
-    int n_retries = 0;
+    int n_retries = 1;
     expressNotifyInterest(n_retries,notifyInterest,publishCallback);
 }

@@ -42,7 +42,7 @@ main(int argc, char* argv[])
     std::thread thread_run(run);
     
     
-    ndn::Name name_at_repo=ndn::Name("client_name").append(ndn::Name("Object_0"+ndn::time::toIsoString(ndn::time::system_clock::now())));
+    ndn::Name name_at_repo=ndn::Name("client_name").append(ndn::Name("Object_"+ndn::time::toIsoString(ndn::time::system_clock::now())));
 
     NDN_LOG_TRACE("PutDataClient: Put data object into the repo");
     auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data_ptr->value_bytes());
@@ -86,6 +86,7 @@ main(int argc, char* argv[])
     NDN_LOG_TRACE("Wait for 5s");
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
+    m_face.removeAllPendingInterests();
     thread_run.join();
 
     

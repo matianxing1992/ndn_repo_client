@@ -10,6 +10,7 @@
 #include "ndn-cxx/util/logger.hpp"
 #include "ndn-cxx/ims/in-memory-storage-fifo.hpp"
 #include "ndn-cxx/util/segmenter.hpp"
+#include <ndn-cxx/util/random.hpp>
 
 
 
@@ -41,6 +42,7 @@ private:
 
     ndn::KeyChain m_keyChain;
     ndn::InMemoryStorageFifo m_published_data;
+    ndn::random::RandomNumberEngine& m_rng;
 
 };
 
