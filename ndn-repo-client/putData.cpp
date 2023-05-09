@@ -30,7 +30,7 @@ void PutDataClient::_on_interest(const ndn::InterestFilter &filter, const ndn::I
     }
 }
 
-ndn::span<const uint8_t> PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> object, ndn::Name& name_at_repo, int segment_size, ndn::time::milliseconds freshness_period, int cpu_count, ResultCallback onResult, ndn::Name* forwarding_hint, ndn::Name& register_prefix, ndn::Name& check_prefix)
+void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> object, ndn::Name& name_at_repo, int segment_size, ndn::time::milliseconds freshness_period, int cpu_count, ResultCallback onResult, ndn::Name* forwarding_hint, ndn::Name& register_prefix, ndn::Name& check_prefix,ndn::span<const uint8_t>& request_no)
 {
     auto segments = m_segmenter.segment(*object,name_at_repo,segment_size, freshness_period);
     NDN_LOG_TRACE("create segments of the object : " << name_at_repo.toUri());
@@ -71,9 +71,10 @@ ndn::span<const uint8_t> PutDataClient::insert_object(std::shared_ptr<ndn::span<
     // The request number of the command is always the SHA256 hash of the command data published in Pub-Sub
     // ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
     ndn::span<const uint8_t> repoCommandParamBytes(objectParam_ptr->wireEncode());
-    auto request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
-    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
-    NDN_LOG_TRACE("Request_no of the request : " << request_no_buffer);
+    static std::shared_ptr<const std::vector<uint8_t>> request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
+    request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
+    // static auto ret = std::make_shared<ndn::span<const uint8_t>>(request_no);
+
 
     pubSub.publish(m_repo_name.append(ndn::Name("insert")),repoCommandParamBytes,
         [&](auto isSuccess){
@@ -88,7 +89,6 @@ ndn::span<const uint8_t> PutDataClient::insert_object(std::shared_ptr<ndn::span<
             }
         });
 
-    return request_no;
 }
 
 

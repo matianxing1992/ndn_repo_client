@@ -60,6 +60,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::Block(ndn_repo_client::FORWARDING_HINT_TYPE,m_name.wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 
@@ -106,6 +107,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::Block(ndn_repo_client::REGISTER_PREFIX_TYPE,m_name.wireEncode());
+            m_wire.encode();
             return m_wire;
         }
 
@@ -150,6 +152,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::START_BLOCK_ID_TYPE,m_startBlockId);
+            m_wire.encode();
             return m_wire;
         }
 
@@ -194,6 +197,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::END_BLOCK_ID_TYPE,m_endBlockId);
+            m_wire.encode();
             return m_wire;
         }
 
@@ -239,6 +243,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::STATUS_CODE_TYPE,m_statusCode);
+            m_wire.encode();
             return m_wire;
         }
 
@@ -282,6 +287,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::INSERT_NUM_TYPE,m_insertNum);
+            m_wire.encode();
             return m_wire;
         }
 
@@ -325,6 +331,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeNonNegativeIntegerBlock(ndn_repo_client::DELETE_NUM_TYPE,m_deleteNum);
+            m_wire.encode();
             return m_wire;
         }
 
@@ -368,6 +375,7 @@ namespace ndn_repo_client
                 return m_wire;
             }
             m_wire = ndn::makeBinaryBlock(ndn_repo_client::REQUEST_NO_TYPE,m_requestNo);
+            m_wire.encode();
             return m_wire;
         }
 

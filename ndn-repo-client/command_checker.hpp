@@ -21,11 +21,11 @@ public:
     //    :param repo_name: Name. The name of the remote repo.
     //    :param request_no: bytes. The request id of the process to check.
     //    :return: The response from the repo.
-    void check_insert(ndn::Name repo_name, ndn::span<const uint8_t> request_no,CheckCallback _callback);
-    void check_delete(ndn::Name repo_name, ndn::span<const uint8_t> request_no,CheckCallback _callback);
+    void check_insert(ndn::Name repo_name, ndn::span<const uint8_t>& request_no,CheckCallback _callback);
+    void check_delete(ndn::Name repo_name, ndn::span<const uint8_t>& request_no,CheckCallback _callback);
 
 private:
-    void _check(std::string method, ndn::Name repo_name, ndn::span<const uint8_t> request_no,CheckCallback _callback);
+    void _check(std::string method, ndn::Name repo_name, ndn::span<const uint8_t>& request_no,CheckCallback _callback);
 
 private:
     ndn::Face& m_face;

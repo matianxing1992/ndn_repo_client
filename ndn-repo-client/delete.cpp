@@ -12,7 +12,7 @@ DeleteClient::DeleteClient(ndn::Face &face, ndn::Name& prefix, ndn::Name& repo_n
     NDN_LOG_TRACE("Init DeleteClient");
 }
 
-ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId, uint64_t endBlockId)
+std::shared_ptr<ndn::span<const uint8_t>> DeleteClient::delete_object(ndn::span<const uint8_t>& request_no,ndn::Name name_at_repo, DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId, uint64_t endBlockId)
 {
     // send command interest
     ndn_repo_client::ObjectParam objectParam(name_at_repo,nullptr,startBlockId,endBlockId,&register_prefix);
@@ -29,8 +29,8 @@ ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, Del
     // ndn::span<const uint8_t> repoCommandParamBytes=repoCommandParam.wireEncode().value_bytes();
     ndn::span<const uint8_t> repoCommandParamBytes(objectParam_ptr->wireEncode());
     auto request_no_buffer = ndn::util::Sha256::computeDigest(repoCommandParamBytes);
-    ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
-    NDN_LOG_TRACE("Request_no of the request : " << request_no_buffer);
+    request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
+    // ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
 
     pubSub.publish(m_repo_name.append(ndn::Name("delete")),repoCommandParamBytes,
         [&](auto isSuccess){
@@ -46,5 +46,5 @@ ndn::span<const uint8_t> DeleteClient::delete_object(ndn::Name name_at_repo, Del
             _callback(isSuccess);
         });
 
-    return request_no;
+    return std::make_shared<ndn::span<const uint8_t>>(request_no);
 }

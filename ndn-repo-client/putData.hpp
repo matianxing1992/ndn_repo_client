@@ -30,8 +30,8 @@ public:
     PutDataClient(ndn::Face& face,const ndn::Name& prefix,const ndn::Name& repo_name, ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo = ndn::security::SigningInfo(),ndn::Name* forwardingHint=nullptr, size_t imsLimit = 6000);
 
     // return request_no
-    ndn::span<const uint8_t> insert_object(std::shared_ptr<ndn::span<const uint8_t>> object,ndn::Name& name_at_repo,int segment_size,ndn::time::milliseconds freshness_period, int cpu_count , ResultCallback onResult,
-                        ndn::Name* forwarding_hint, ndn::Name& register_prefix, ndn::Name& check_prefix);
+    void insert_object(std::shared_ptr<ndn::span<const uint8_t>> object,ndn::Name& name_at_repo,int segment_size,ndn::time::milliseconds freshness_period, int cpu_count , ResultCallback onResult,
+                        ndn::Name* forwarding_hint, ndn::Name& register_prefix, ndn::Name& check_prefix,ndn::span<const uint8_t>& request_no);
 
     // return request_no
     ndn::span<const uint8_t> insert_objects(std::vector<ndn::span<const uint8_t>> objects,ndn::Name name_at_repo,int segment_size,ndn::time::milliseconds freshness_period, int cpu_count , ResultCallback onResult,
