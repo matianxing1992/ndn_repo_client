@@ -36,8 +36,7 @@ public:
             under the NDN prefix registration security model. If not specified, default value is\
             the client prefix.
     // return request_no
-    std::shared_ptr<ndn::span<const uint8_t>> delete_object(ndn::span<const uint8_t>& request_no,ndn::Name name_at_repo,DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId=(uint64_t)0,uint64_t endBlockId=(uint64_t)-1);
-
+    void delete_object(ndn::span<const uint8_t>& request_no,ndn::Name& name_at_repo,DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId=(uint64_t)0,uint64_t endBlockId=(uint64_t)-1);
 
 
 private:

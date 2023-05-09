@@ -41,7 +41,8 @@ main(int argc, char* argv[])
 
     std::thread thread_run(run);
     
-    ndn::Name name_at_repo=ndn::Name("client_name").append(ndn::Name("Object_0"));
+    
+    ndn::Name name_at_repo=ndn::Name("client_name").append(ndn::Name("Object_0"+ndn::time::toIsoString(ndn::time::system_clock::now())));
 
     NDN_LOG_TRACE("PutDataClient: Put data object into the repo");
     auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data_ptr->value_bytes());
@@ -72,14 +73,14 @@ main(int argc, char* argv[])
 
     CommandChecker _checker(m_face);
     _checker.check_insert(m_repo_name,request_no,[&](ndn_repo_client::RepoCommandRes res){
-      NDN_LOG_TRACE("Check insert status code: "<< res.m_statusCode.m_statusCode);
+      // NDN_LOG_TRACE("Check insert status code: "<< res.m_statusCode.m_statusCode);
     });
     
     NDN_LOG_TRACE("Wait for 1s");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     _checker.check_delete(m_repo_name,request_no_1,[&](ndn_repo_client::RepoCommandRes res){
-      NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
+      // NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
     });
 
     NDN_LOG_TRACE("Wait for 5s");

@@ -76,8 +76,9 @@ void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> obje
     // static auto ret = std::make_shared<ndn::span<const uint8_t>>(request_no);
 
 
-    pubSub.publish(m_repo_name.append(ndn::Name("insert")),repoCommandParamBytes,
-        [&](auto isSuccess){
+    ndn::Name insertName(m_repo_name);
+    insertName.append(ndn::Name("insert"));
+    static auto handler = [&](bool isSuccess){
             // using PublishCallback = std::function<void(bool)>;
             if(isSuccess){
                 NDN_LOG_TRACE("Published an insert msg and was acknowledged by a subscriber");
@@ -87,7 +88,8 @@ void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> obje
             }else{
                 NDN_LOG_TRACE("Published an insert msg but was not acknowledged by a subscriber");
             }
-        });
+        };
+    pubSub.publish(insertName,repoCommandParamBytes,handler);
 
 }
 

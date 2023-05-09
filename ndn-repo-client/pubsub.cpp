@@ -36,24 +36,24 @@ PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, in
         });
 }
 
-void PubSub::expressNotifyInterest(int n_retries, ndn::Interest notifyInterest, PublishCallback publishCallback)
+void PubSub::expressNotifyInterest(int n_retries, const ndn::Interest& notifyInterest, PublishCallback publishCallback)
 {
     n_retries-=1;
     if(n_retries>=0)
     {
-            m_face.expressInterest(notifyInterest,
-        [&](const ndn::Interest&, const ndn::Data&)
+        m_face.expressInterest(notifyInterest,
+        [&](const ndn::Interest& interest, const ndn::Data&)
         {
             publishCallback(true);
-            NDN_LOG_TRACE("publish succeeded : " << notifyInterest.toUri());
+            NDN_LOG_TRACE("publish succeeded " << interest.toUri());
         },
-        [&](const ndn::Interest&, const ndn::lp::Nack&)
+        [&](const ndn::Interest& interest, const ndn::lp::Nack&)
         {
-            expressNotifyInterest(n_retries,notifyInterest,publishCallback);
+            expressNotifyInterest(n_retries,interest,publishCallback);
         },
-        [&](const ndn::Interest&)
+        [&](const ndn::Interest& interest)
         {
-            expressNotifyInterest(n_retries,notifyInterest,publishCallback);
+            expressNotifyInterest(n_retries,interest,publishCallback);
         });
 
     }
@@ -105,11 +105,11 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     }
 
     notifyInterest.setApplicationParameters(applicationParameters);
-    notifyInterest.setInterestLifetime(ndn::time::milliseconds(3000));
+    // notifyInterest.setInterestLifetime(ndn::time::milliseconds(10000));
 
     NDN_LOG_TRACE("NotifyInterest : " << notifyInterest.toUri());
     
     // express notify interest, will retry for n_retries
-    int n_retries = 3;
+    int n_retries = 0;
     expressNotifyInterest(n_retries,notifyInterest,publishCallback);
 }

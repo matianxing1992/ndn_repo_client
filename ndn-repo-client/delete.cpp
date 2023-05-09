@@ -12,7 +12,7 @@ DeleteClient::DeleteClient(ndn::Face &face, ndn::Name& prefix, ndn::Name& repo_n
     NDN_LOG_TRACE("Init DeleteClient");
 }
 
-std::shared_ptr<ndn::span<const uint8_t>> DeleteClient::delete_object(ndn::span<const uint8_t>& request_no,ndn::Name name_at_repo, DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId, uint64_t endBlockId)
+void DeleteClient::delete_object(ndn::span<const uint8_t>& request_no,ndn::Name& name_at_repo, DeleteCallback _callback,ndn::Name& register_prefix,ndn::Name& check_prefix, uint64_t startBlockId, uint64_t endBlockId)
 {
     // send command interest
     ndn_repo_client::ObjectParam objectParam(name_at_repo,nullptr,startBlockId,endBlockId,&register_prefix);
@@ -32,7 +32,9 @@ std::shared_ptr<ndn::span<const uint8_t>> DeleteClient::delete_object(ndn::span<
     request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
     // ndn::span<const uint8_t> request_no = ndn::span<const uint8_t>(request_no_buffer->begin(),request_no_buffer->end());
 
-    pubSub.publish(m_repo_name.append(ndn::Name("delete")),repoCommandParamBytes,
+    ndn::Name deleteName(m_repo_name);
+    deleteName.append(ndn::Name("delete"));
+    pubSub.publish(deleteName,repoCommandParamBytes,
         [&](auto isSuccess){
             // using PublishCallback = std::function<void(bool)>;
             if(isSuccess){
@@ -45,6 +47,4 @@ std::shared_ptr<ndn::span<const uint8_t>> DeleteClient::delete_object(ndn::span<
             }
             _callback(isSuccess);
         });
-
-    return std::make_shared<ndn::span<const uint8_t>>(request_no);
 }

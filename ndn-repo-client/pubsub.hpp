@@ -25,7 +25,7 @@ public:
     PubSub(ndn::Face& face,ndn::Name prefix, ndn::Name* forwarding_hint = nullptr,  int ims_limit=6000);
 
 private:
-    void expressNotifyInterest(int n_retries, ndn::Interest notifyInterest, PublishCallback publishCallback);
+    void expressNotifyInterest(int n_retries, const ndn::Interest& notifyInterest, PublishCallback publishCallback);
 
 public:  
     void publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCallback publishCallback);

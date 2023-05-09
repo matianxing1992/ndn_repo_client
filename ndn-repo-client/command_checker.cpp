@@ -35,24 +35,24 @@ void CommandChecker::_check(std::string method, ndn::Name repo_name, ndn::span<c
     NDN_LOG_TRACE("check : " << checkInterest.toUri());
 
     m_face.expressInterest(checkInterest,
-            [&](const ndn::Interest&, const ndn::Data& data)
+            [&](const ndn::Interest& interest, const ndn::Data& data)
         {
             // afterSatisfied
-            NDN_LOG_TRACE("check interest satisfied: " << checkInterest.toUri());
+            NDN_LOG_TRACE("check interest satisfied: " << interest.toUri());
             // ndn::Block _block_repoCommandRes(ndn_repo_client::REPO_COMMAND_RES,data.getContent());
             // _callback(ndn_repo_client::RepoCommandRes(_block_repoCommandRes));
 
         },
-        [&](const ndn::Interest&, const ndn::lp::Nack&)
+        [&](const ndn::Interest& interest, const ndn::lp::Nack&)
         {
             // afterNacked
-            NDN_LOG_DEBUG("check interest nacked: " << checkInterest.toUri());
+            NDN_LOG_DEBUG("check interest nacked: " << interest.toUri());
 
         },
-        [&](const ndn::Interest&)
+        [&](const ndn::Interest& interest)
         {
             // afterTimeout
-            NDN_LOG_DEBUG("check interest timeout:" << checkInterest.toUri());
+            NDN_LOG_DEBUG("check interest timeout:" << interest.toUri());
 
     });
 }
