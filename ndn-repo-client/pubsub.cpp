@@ -2,21 +2,10 @@
 
 NDN_LOG_INIT(ndn_repo_client.pubsub);
 
-template <std::size_t N>
-void generateInitVector(uint8_t (&IV_buff)[N])
-{
-    using bytes_randomizer = std::independent_bits_engine<std::default_random_engine, CHAR_BIT, uint8_t>;
-    std::default_random_engine rd;
-    bytes_randomizer bytes(rd);
-
-    std::generate(std::begin(IV_buff), std::end(IV_buff), std::ref(bytes));
-}
-
 PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, int ims_limit)
     : m_face(face),
     m_publisher_prefix(prefix),
-    m_published_data(ims_limit),
-    m_rng(ndn::random::getRandomNumberEngine())
+    m_published_data(ims_limit)
 {
     NDN_LOG_TRACE("Init pubsub");
     m_forwarding_hint = forwarding_hint;

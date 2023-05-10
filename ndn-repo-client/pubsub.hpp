@@ -42,7 +42,6 @@ private:
 
     ndn::KeyChain m_keyChain;
     ndn::InMemoryStorageFifo m_published_data;
-    ndn::random::RandomNumberEngine& m_rng;
 
 };
 
