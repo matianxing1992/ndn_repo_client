@@ -2,7 +2,7 @@
 #define NDN_REPO_CLIENT_COMMAND_CHECKER_HPP
 
 #include "ndn-cxx/face.hpp"
-#include "tlv.hpp"
+#include <ndn-repo-client/tlv.hpp>
 #include "ndn-cxx/util/logger.hpp"
 
 

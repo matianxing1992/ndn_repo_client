@@ -8,12 +8,12 @@
 #define NDN_REPO_CLIENT_PUTDATA_HPP
 
 #include <ndn-cxx/face.hpp>
-#include "tlv.hpp"
+#include <ndn-repo-client/tlv.hpp>
 #include "ndn-cxx/util/logger.hpp"
 #include <ndn-cxx/util/segmenter.hpp>
 #include <ndn-cxx/ims/in-memory-storage-fifo.hpp>
-#include <pubsub.hpp>
-#include <command_checker.hpp>
+#include <ndn-repo-client/pubsub.hpp>
+#include <ndn-repo-client/command_checker.hpp>
 
 
 

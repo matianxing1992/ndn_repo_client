@@ -1,4 +1,4 @@
-#include "getData.hpp"
+#include <ndn-repo-client/getData.hpp>
 
 NDN_LOG_INIT(ndn_repo_client.getData);
 

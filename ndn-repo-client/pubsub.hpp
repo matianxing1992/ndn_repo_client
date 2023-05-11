@@ -4,7 +4,7 @@
 #ifndef NDN_REPO_CLIENT_PUBSUB_HPP
 #define NDN_REPO_CLIENT_PUBSUB_HPP
 
-#include "tlv.hpp"
+#include <ndn-repo-client/tlv.hpp>
 #include <random>
 #include <ndn-cxx/face.hpp>
 #include "ndn-cxx/util/logger.hpp"

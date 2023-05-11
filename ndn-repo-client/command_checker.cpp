@@ -1,4 +1,4 @@
-#include "command_checker.hpp"
+#include <ndn-repo-client/command_checker.hpp>
 
 NDN_LOG_INIT(ndn_repo_client.command_checker);
 

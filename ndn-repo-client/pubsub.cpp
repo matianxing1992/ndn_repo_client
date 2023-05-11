@@ -1,4 +1,4 @@
-#include "pubsub.hpp"
+#include <ndn-repo-client/pubsub.hpp>
 
 NDN_LOG_INIT(ndn_repo_client.pubsub);
 
@@ -102,6 +102,6 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     NDN_LOG_TRACE("NotifyInterest : " << notifyInterest.toUri());
     
     // express notify interest, will retry for n_retries
-    int n_retries = 1;
+    int n_retries = 3;
     expressNotifyInterest(n_retries,notifyInterest,publishCallback);
 }
