@@ -21,7 +21,12 @@ int
 main(int argc, char* argv[])
 {
   try {
-    auto data_ptr=std::make_shared<ndn::Block>(ndn::makeStringBlock(ndn::tlv::Data,"Put data object into the repo"));
+    std::string content="";
+    for(int i=0;i<1;i++)
+    {
+      content+="Put data object into the repo. ";
+    }
+    auto data_ptr=std::make_shared<ndn::Block>(ndn::makeStringBlock(ndn::tlv::Data,content));
 
     ndn::Face m_face("127.0.0.1");
 
@@ -72,15 +77,15 @@ main(int argc, char* argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
     CommandChecker _checker(m_face);
-    _checker.check_insert(m_repo_name,request_no,[&](ndn_repo_client::RepoCommandRes res){
-      // NDN_LOG_TRACE("Check insert status code: "<< res.m_statusCode.m_statusCode);
+    _checker.check_insert(m_repo_name,request_no,[&](uint64_t res){
+      NDN_LOG_TRACE("Check insert status code: "<< res);
     });
     
     NDN_LOG_TRACE("Wait for 1s");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    _checker.check_delete(m_repo_name,request_no_1,[&](ndn_repo_client::RepoCommandRes res){
-      // NDN_LOG_TRACE("Check Delete status code: "<< res.m_statusCode.m_statusCode);
+    _checker.check_delete(m_repo_name,request_no_1,[&](uint64_t res){
+      NDN_LOG_TRACE("Check Delete status code: "<< res);
     });
 
     NDN_LOG_TRACE("Wait for 5s");

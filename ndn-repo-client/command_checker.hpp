@@ -7,7 +7,7 @@
 
 
 
-using CheckCallback = std::function<void(ndn_repo_client::RepoCommandRes)>;
+using CheckCallback = std::function<void(uint64_t)>;
 
 
 // The request number of the command is always the SHA256 hash of the command data published in Pub-Sub

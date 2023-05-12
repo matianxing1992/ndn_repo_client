@@ -24,7 +24,7 @@ namespace ndn_repo_client
         OBJECT_PARAM_TYPE           = 301,
         OBJECT_RESULT_TYPE          = 302,
         REPO_COMMAND_PARAM          = 303,
-        REPO_COMMAND_RES            = ndn::tlv::Data,
+        REPO_COMMAND_RES            = ndn::tlv::Content,
         REPO_STAT_QUERY             = ndn::tlv::ApplicationParameters,
     };
 
@@ -663,7 +663,8 @@ namespace ndn_repo_client
             }
             wire.parse();
             m_wire = wire;
-            m_objectResults->clear();
+            std::vector<ObjectResult> tmp;
+            m_objectResults=std::make_shared<std::vector<ObjectResult>>(tmp);
             for (auto it = m_wire.elements_begin(); it != m_wire.elements_end(); ++it) {
                 if (it->type() == ndn_repo_client::OBJECT_RESULT_TYPE) {
                     m_objectResults->push_back(ObjectResult(*it));
