@@ -23,6 +23,8 @@ using DeleteCallback = std::function<void(bool)>;
 class DeleteClient
 {
 public:
+    DeleteClient(){};
+
     // A client to delete data in the repo
     DeleteClient(ndn::Face& face, ndn::Name& prefix, ndn::Name& repo_name);
 

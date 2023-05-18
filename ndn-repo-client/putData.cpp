@@ -22,6 +22,7 @@ void PutDataClient::_on_interest(const ndn::InterestFilter &filter, const ndn::I
     if (data != nullptr)
     {
         m_face.put(*data);
+        m_ims.erase(interest.getName());
         NDN_LOG_TRACE("Reply from IMS : " << interest.getName());
     }
     else
