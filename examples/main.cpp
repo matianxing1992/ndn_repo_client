@@ -54,7 +54,9 @@ main(int argc, char* argv[])
 
     ndn::span<const uint8_t> request_no;
     m_putDataClient.insert_object(data_bytes,name_at_repo,1024,ndn::time::milliseconds(600000),1,
-      [&](auto){},nullptr,m_repo_name,m_client_name,request_no);
+      [&](auto isComplete){
+        if(isComplete)NDN_LOG_TRACE("Insertion Done");
+      },nullptr,m_repo_name,m_client_name,request_no);
 
     NDN_LOG_TRACE("Wait for 1s");
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));

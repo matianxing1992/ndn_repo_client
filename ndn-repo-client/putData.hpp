@@ -15,6 +15,7 @@
 #include <ndn-repo-client/pubsub.hpp>
 #include <ndn-repo-client/command_checker.hpp>
 #include <ndn-cxx/util/scheduler.hpp>
+#include <thread>
 
 
 
@@ -41,7 +42,7 @@ public:
 private:
     void _on_interest(const ndn::InterestFilter& filter, const ndn::Interest& interest);
 
-    void _check_progress();
+    void _check_progress(ndn::Name& m_repo_name, ndn::span<const uint8_t>& request_no, PublishCallback onResult);
 
 
 private:
