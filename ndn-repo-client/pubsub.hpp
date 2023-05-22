@@ -11,6 +11,7 @@
 #include "ndn-cxx/ims/in-memory-storage-fifo.hpp"
 #include "ndn-cxx/util/segmenter.hpp"
 #include <ndn-cxx/util/random.hpp>
+#include <ndn-cxx/interest.hpp>
 
 
 

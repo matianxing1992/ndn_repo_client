@@ -32,16 +32,16 @@ void PubSub::expressNotifyInterest(int n_retries, const ndn::Interest& notifyInt
     if(n_retries>=0)
     {
         m_face.expressInterest(notifyInterest,
-        [&,publishCallback](const ndn::Interest& interest, const ndn::Data&)
+        [&,n_retries,publishCallback](const ndn::Interest& interest, const ndn::Data&)
         {
             publishCallback(true);
             NDN_LOG_TRACE("publish succeeded " << interest.toUri());
         },
-        [&,publishCallback](const ndn::Interest& interest, const ndn::lp::Nack&)
+        [&,n_retries,publishCallback](const ndn::Interest& interest, const ndn::lp::Nack&)
         {
             expressNotifyInterest(n_retries,interest,publishCallback);
         },
-        [&,publishCallback](const ndn::Interest& interest)
+        [&,n_retries,publishCallback](const ndn::Interest& interest)
         {
             expressNotifyInterest(n_retries,interest,publishCallback);
         });
@@ -97,7 +97,7 @@ void PubSub::publish(ndn::Name topic, ndn::span<const uint8_t>& msg, PublishCall
     }
 
     notifyInterest.setApplicationParameters(applicationParameters);
-    notifyInterest.setInterestLifetime(ndn::time::milliseconds(10000));
+    notifyInterest.setInterestLifetime(ndn::time::milliseconds(60000));
 
     NDN_LOG_TRACE("NotifyInterest : " << notifyInterest.toUri());
     

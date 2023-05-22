@@ -10,7 +10,8 @@ PutDataClient::PutDataClient(ndn::Face& face, const ndn::Name& prefix, const ndn
      m_segmenter(keyChain, signingInfo),
      m_ims(imsLimit),
      m_keyChain(keyChain),
-     commandChecker(m_face)
+     commandChecker(m_face),
+     m_scheduler(m_face.getIoService())
 {
     NDN_LOG_TRACE("Init PutDataClient");
 }
@@ -22,7 +23,7 @@ void PutDataClient::_on_interest(const ndn::InterestFilter &filter, const ndn::I
     if (data != nullptr)
     {
         m_face.put(*data);
-        m_ims.erase(interest.getName());
+        // m_ims.erase(interest.getName());
         NDN_LOG_TRACE("Reply from IMS : " << interest.getName());
     }
     else
@@ -30,6 +31,7 @@ void PutDataClient::_on_interest(const ndn::InterestFilter &filter, const ndn::I
         NDN_LOG_TRACE("Failed to reply from IMS : " << interest.getName());
     }
 }
+
 
 void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> object, ndn::Name& name_at_repo, int segment_size, ndn::time::milliseconds freshness_period, int cpu_count, ResultCallback onResult, ndn::Name* forwarding_hint, ndn::Name& register_prefix, ndn::Name& check_prefix,ndn::span<const uint8_t>& request_no)
 {
@@ -79,16 +81,60 @@ void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> obje
 
     ndn::Name insertName(m_repo_name);
     insertName.append(ndn::Name("insert"));
-    static auto handler = [&](bool isSuccess){
-            // using PublishCallback = std::function<void(bool)>;
+    static auto handler = [&,onResult,request_no](bool isSuccess) mutable {
+            // using PublishCallback = std::jjfunction<void(bool)>;
             if(isSuccess){
                 NDN_LOG_TRACE("Published an insert msg and was acknowledged by a subscriber");
                 // check the insert progress
                 // int n_tries = 3;
-                // commandChecker.check_insert(m_repo_name,request_no,[&](auto){});
+                // std::function<void(void)> checkHandler = [&, onResult, request_no, checkHandler]() mutable
+                // {
+                    
+                //     commandChecker.check_insert(m_repo_name, request_no, [&,checkHandler,onResult](uint64_t res)
+                //                                 {
+                //                                     switch (res)
+                //                                     {
+                //                                     case ndn_repo_client::NOT_FOUND:
+                //                                         onResult(false);
+                //                                         break;
+                //                                     case ndn_repo_client::IN_PROGRESS:
+                //                                         m_scheduler.schedule(ndn::time::milliseconds(1000),[&, onResult, request_no, checkHandler](){
+                //                                             checkHandler();
+                //                                         });
+                //                                         break;
+                //                                     case ndn_repo_client::COMPLETED:
+                //                                         onResult(true);
+                //                                         break;
+                //                                     case ndn_repo_client::FAILED:
+                //                                         onResult(false);
+                //                                         break;
+                //                                     }
+                //                                 });
+                // };
+                // commandChecker.check_insert(m_repo_name,request_no,[&](uint64_t res){
+                //     switch(res)
+                //     {
+                //         case ndn_repo_client::NOT_FOUND:
+                //             onResult(false);
+                //             break;
+                //         case ndn_repo_client::IN_PROGRESS:
+                //             onResult(true);
+                //             break;
+                //         case ndn_repo_client::COMPLETED:
+                //             onResult(true);
+                //             break;
+                //         case ndn_repo_client::FAILED:
+                //             onResult(false);
+                //             break;
+                //     }
+
+                // });
+
             }else{
                 NDN_LOG_TRACE("Published an insert msg but was not acknowledged by a subscriber");
+                // onResult(isSuccess);
             }
+            onResult(isSuccess);
         };
     pubSub.publish(insertName,repoCommandParamBytes,handler);
 

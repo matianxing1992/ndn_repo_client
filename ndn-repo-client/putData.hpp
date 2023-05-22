@@ -14,6 +14,7 @@
 #include <ndn-cxx/ims/in-memory-storage-fifo.hpp>
 #include <ndn-repo-client/pubsub.hpp>
 #include <ndn-repo-client/command_checker.hpp>
+#include <ndn-cxx/util/scheduler.hpp>
 
 
 
@@ -40,6 +41,8 @@ public:
 private:
     void _on_interest(const ndn::InterestFilter& filter, const ndn::Interest& interest);
 
+    void _check_progress();
+
 
 private:
     ndn::Face& m_face;
@@ -55,6 +58,7 @@ private:
     ndn::KeyChain& m_keyChain;
 
     CommandChecker commandChecker;
+    ndn::Scheduler m_scheduler;
 };
 
 

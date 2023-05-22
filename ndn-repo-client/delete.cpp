@@ -1,4 +1,4 @@
-#include "ndn-repo-client/delete.hpp"
+#include <ndn-repo-client/delete.hpp>
 
 NDN_LOG_INIT(ndn_repo_client.delete);
 
