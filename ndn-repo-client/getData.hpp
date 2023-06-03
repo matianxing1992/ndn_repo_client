@@ -6,7 +6,7 @@
 #include "ndn-cxx/util/logger.hpp"
 #include <ndn-cxx/util/segmenter.hpp>
 #include <ndn-cxx/ims/in-memory-storage-fifo.hpp>
-#include <ndn-cxx/util/segment-fetcher.hpp>
+#include "ndn-repo-client/utils/SegmentFetcher.hpp"
 #include <ndn-cxx/security/validator-null.hpp>
 
 #include <ndn-repo-client/tlv.hpp>
@@ -14,6 +14,7 @@
 
 
 using FetchedDataCallback = std::function<void(ndn::span<const uint8_t>)>;
+
 
 
 class GetDataClient

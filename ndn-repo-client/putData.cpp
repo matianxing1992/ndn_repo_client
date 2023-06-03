@@ -15,6 +15,10 @@ PutDataClient::PutDataClient(ndn::Face& face, const ndn::Name& prefix, const ndn
      m_scheduler(m_face.getIoService())
 {
     NDN_LOG_TRACE("Init PutDataClient");
+    m_face.setInterestFilter(ndn::InterestFilter(m_prefix),std::bind(&PutDataClient::_on_interest,this,_1,_2),
+    [&](auto,auto){
+        NDN_LOG_DEBUG("failed to register prefix : " << m_prefix.toUri());
+    });
 }
 
 
@@ -23,19 +27,20 @@ void PutDataClient::_on_interest(const ndn::InterestFilter &filter, const ndn::I
     auto data = m_ims.find(interest.getName());
     if (data != nullptr)
     {
+        // if(interest.getName()[-1].isSegment())
         m_face.put(*data);
         // m_ims.erase(interest.getName());
-        NDN_LOG_TRACE("Reply from IMS : " << interest.getName());
+        NDN_LOG_TRACE("Reply from PutDataClient IMS : " << interest.getName());
     }
     else
     {
-        NDN_LOG_TRACE("Failed to reply from IMS : " << interest.getName());
+        NDN_LOG_TRACE("Failed to reply from PutDataClient IMS : " << interest.getName());
     }
 }
 
 void PutDataClient::_check_progress(ndn::Name& m_repo_name, ndn::span<const uint8_t>& request_no, PublishCallback onResult)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     commandChecker.check_insert(m_repo_name, request_no, [&, m_repo_name, request_no, onResult](uint64_t res) mutable{
         switch (res)
         {
@@ -49,6 +54,7 @@ void PutDataClient::_check_progress(ndn::Name& m_repo_name, ndn::span<const uint
                 onResult(true);
                 break;
             case ndn_repo_client::FAILED:
+                // insertion failed, or command interest nack
                 onResult(false);
                 break;
             default:
@@ -60,20 +66,18 @@ void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> obje
 {
     auto segments = m_segmenter.segment(*object,name_at_repo,segment_size, freshness_period);
     NDN_LOG_TRACE("create segments of the object : " << name_at_repo.toUri());
-    for (auto segment:segments)
-        m_ims.insert(*segment,ndn::time::milliseconds(600000));
+    for (const auto& segment:segments){
+        m_ims.insert(*segment,ndn::time::milliseconds(freshness_period));
+        m_scheduler.schedule(ndn::time::milliseconds(freshness_period), [this, name = segment->getName()] { m_ims.erase(name); });
+    }
+        
     NDN_LOG_TRACE("insert into local in-memory-storage " << segments.at(0)->getName().toUri());
     int num_packets=segments.size();
 
 
     // If the uploaded file has the client's name as prefix, set an interest filter
     // for handling corresponding Interests from the repo
-    if (m_prefix.isPrefixOf(name_at_repo))
-    {
-        NDN_LOG_DEBUG("set interest filter : " << name_at_repo.toUri());
-        m_face.setInterestFilter(ndn::InterestFilter(name_at_repo),std::bind(&PutDataClient::_on_interest,this,_1,_2));
-    }
-    else
+    if (!m_prefix.isPrefixOf(name_at_repo))
     {
         // Otherwise, register the file name as prefix for responding interests from the repo
         NDN_LOG_DEBUG("set interest filter and register prefix : " << name_at_repo.toUri());
@@ -114,9 +118,9 @@ void PutDataClient::insert_object(std::shared_ptr<ndn::span<const uint8_t>> obje
 
             }else{
                 NDN_LOG_TRACE("Published an insert msg but was not acknowledged by a subscriber");
-                // onResult(isSuccess);
+                onResult(isSuccess);
             }
-            onResult(isSuccess);
+            
         };
     pubSub.publish(insertName,repoCommandParamBytes,handler);
 

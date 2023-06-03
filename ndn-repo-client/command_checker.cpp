@@ -30,7 +30,7 @@ void CommandChecker::_check(std::string method, ndn::Name repo_name, ndn::span<c
     checkInterest.setApplicationParameters(ndn::makeBinaryBlock(ndn_repo_client::REQUEST_NO_TYPE,request_no));
     checkInterest.setMustBeFresh(true);
     checkInterest.setCanBePrefix(false);
-    checkInterest.setInterestLifetime(ndn::time::milliseconds(1000));
+    checkInterest.setInterestLifetime(ndn::time::milliseconds(10000));
 
     NDN_LOG_TRACE("check : " << checkInterest.toUri());
 
@@ -48,12 +48,14 @@ void CommandChecker::_check(std::string method, ndn::Name repo_name, ndn::span<c
         [&,_callback](const ndn::Interest& interest, const ndn::lp::Nack&)
         {
             // afterNacked
+            _callback(ndn_repo_client::FAILED);
             NDN_LOG_DEBUG("check interest nacked: " << interest.toUri());
 
         },
         [&,_callback](const ndn::Interest& interest)
         {
             // afterTimeout
+            _callback(ndn_repo_client::IN_PROGRESS);
             NDN_LOG_DEBUG("check interest timeout:" << interest.toUri());
 
     });

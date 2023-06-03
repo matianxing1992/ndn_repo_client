@@ -9,17 +9,17 @@ PubSub::PubSub(ndn::Face &face, ndn::Name prefix, ndn::Name* forwarding_hint, in
 {
     NDN_LOG_TRACE("Init pubsub");
     m_forwarding_hint = forwarding_hint;
-    m_face.setInterestFilter(m_publisher_prefix,
+    m_face.setInterestFilter(ndn::Name(m_publisher_prefix).append(ndn::Name("msg")),
         [&](const ndn::InterestFilter&, const ndn::Interest& interest){
             auto data=m_published_data.find(interest.getName());
             if(data!=nullptr)
             {
                 m_face.put(*data);
-                NDN_LOG_TRACE("reply from IMS : " << interest.getName() );
+                NDN_LOG_TRACE("reply from IMS : " << interest.getName().toUri() );
             }
             else
             {
-                NDN_LOG_TRACE("Failed to reply from IMS : " << interest.getName() );
+                NDN_LOG_TRACE("Failed to reply from IMS : " << interest.getName().toUri() );
             }
         },[&](const ndn::Name& prefix, const std::string& e){
             NDN_LOG_DEBUG("Failed to register the prefix : " << prefix.toUri() << " - " << e);
