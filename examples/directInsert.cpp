@@ -1,4 +1,5 @@
-#include "ndn-repo-client/directInsertSqlite3.hpp"
+#include "ndn-repo-client/utils/directInsertSqlite3.hpp"
+#include "ndn-repo-client/utils/ReadHandle.hpp"
 #include "ndn-repo-client/getData.hpp"
 
 #include <ndn-cxx/util/logger.hpp>
@@ -11,6 +12,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <ndn-cxx/name.hpp>
 
 NDN_LOG_INIT(examples.directInsert);
 
@@ -20,19 +22,25 @@ main(int argc, char* argv[])
 {
   try {
     std::string content="";
-    for(int i=0;i<1;i++)
+    for(int i=0;i<300000;i++)
     {
-      content+="Put data object into the repo. ";
+      content+=std::to_string(i)+": Put data object into the repo. ";
     }
-    auto data_ptr=std::make_shared<ndn::Block>(ndn::makeStringBlock(ndn::tlv::Data,content));
+    auto data=ndn::makeStringBlock(ndn::tlv::Data,content);
 
     ndn::Face m_face("127.0.0.1");
+    ndn::Face m_face_2;
 
     auto run=[&](){
-      m_face.processEvents(ndn::time::milliseconds(30000),true);
+      m_face.processEvents(ndn::time::milliseconds(0),true);
+     
+    };
+    auto run2=[&](){
+      m_face_2.processEvents(ndn::time::milliseconds(0),true);
     };
 
     std::thread thread_run(run);
+    std::thread thread_run2(run2);
 
     ndn::Scheduler m_scheduler{m_face.getIoService()};
     ndn::Name m_client_name("client_name");
@@ -44,7 +52,9 @@ main(int argc, char* argv[])
 
     DirectInsertSqlite3Client* m_directInsertClient=DirectInsertSqlite3Client::GetInstance(m_keyChain,ndn::security::SigningInfo());
 
-
+    ReadHandle* _readHandle = ReadHandle::GetInstance(m_face_2);
+    //listen to root
+    _readHandle->listen(ndn::Name("client_name"));
 
     
     
@@ -53,14 +63,14 @@ main(int argc, char* argv[])
 
     NDN_LOG_TRACE("DirectInsert: Put data object into the database directly");
 
-    auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data_ptr->value_bytes());
+    auto data_bytes = std::make_shared<ndn::span<const uint8_t>>(data.value_bytes());
     m_directInsertClient->putData(name_at_repo,data_bytes);
-    NDN_LOG_TRACE(name_at_repo);
+    NDN_LOG_TRACE(name_at_repo<<" "<<data_bytes->size()<<" bytes");
 
     GetDataClient m_getDataClient(m_face,m_repo_name);
     m_getDataClient.fetch_object(name_at_repo,[&](auto data){
-      ndn::Block _b=ndn::makeBinaryBlock(ndn::tlv::Data,data);
-      NDN_LOG_TRACE("Get data from repo: "<< ndn::readString(_b));
+      // ndn::Block _b=ndn::makeBinaryBlock(ndn::tlv::Data,data);
+      NDN_LOG_TRACE("Get data from repo: "<< data.size());
     });
 
     
@@ -73,7 +83,7 @@ main(int argc, char* argv[])
     
 
 
-    NDN_LOG_TRACE("Wait for 10s");
+    NDN_LOG_TRACE("Wait for 30s");
     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     
     thread_run.join();

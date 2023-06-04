@@ -19,8 +19,8 @@
  * See AUTHORS.md for complete list of ndn-cxx authors and contributors.
  */
 
-#ifndef NDN_REPO_CLIENT_UTIL_SEGMENT_FETCHER_HPP
-#define NDN_REPO_CLIENT_UTIL_SEGMENT_FETCHER_HPP
+#ifndef NDN_REPO_CLIENT_UTILS_SEGMENT_FETCHER_HPP
+#define NDN_REPO_CLIENT_UTILS_SEGMENT_FETCHER_HPP
 
 #include "ndn-cxx/face.hpp"
 #include "ndn-cxx/security/validator.hpp"

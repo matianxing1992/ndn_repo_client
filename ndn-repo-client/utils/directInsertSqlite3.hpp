@@ -11,6 +11,7 @@
 #include "ndn-cxx/name.hpp"
 #include <ndn-cxx/face.hpp>
 #include <ndn-cxx/util/segmenter.hpp>
+#include "ndn-repo-client/utils/ReadHandle.hpp"
 
 class DirectInsertSqlite3Client
 {
@@ -45,6 +46,8 @@ private:
     }
 
     void _put(ndn::span<const uint8_t>& key, ndn::span<const uint8_t>& value, uint64_t expire_time_ms);
+
+    void _putMany(std::vector<std::shared_ptr<ndn::Data>>& data, uint64_t expire_time_ms);
 
     static DirectInsertSqlite3Client* _client;
 

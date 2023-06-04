@@ -139,7 +139,7 @@ SegmentFetcher::fetchSegmentsInWindow(const Interest& origInterest)
   for (const auto& segment : segmentsToRequest) {
     Interest interest(origInterest); // to preserve Interest elements
     interest.setName(Name(m_versionedDataName).appendSegment(segment.first));
-    interest.setCanBePrefix(false);
+    interest.setCanBePrefix(true);
     interest.setMustBeFresh(false);
     interest.setInterestLifetime(m_options.interestLifetime);
     interest.refreshNonce();
