@@ -32,21 +32,13 @@ void DirectInsertSqlite3Client::putData(ndn::Name &name_at_repo, std::shared_ptr
     uint64_t expireTime = (uint64_t)current.count()+(uint64_t)freshness_period.count();
     auto segments = m_segmenter.segment(*object,name_at_repo,segment_size, freshness_period);
     _putMany(segments,expireTime);
-    auto _readHandle = ReadHandle::GetInstance();
+
+    // Can comment if there's no local ReadHandle running
+    auto _readHandle = ReadHandle::GetExistingEInstance();
     if(_readHandle!=nullptr)
     {
-        for(auto data:segments)
-            _readHandle->addToCache(*data);
+        _readHandle->addToCache(name_at_repo.toUri(),segments);
     }
-
-    // for(auto data:segments)
-    // {
-    //     // remove name's TL as key to support efficient prefix search
-    //     ndn::span<const uint8_t> keyBytes=data->getName().wireEncode().value_bytes();
-    //     ndn::span<const uint8_t> dataBytes(data->wireEncode().data(),data->wireEncode().size());
-    //     _put(keyBytes,dataBytes,expireTime);
-        
-    // }
 }
 
 void DirectInsertSqlite3Client::_putMany(std::vector<std::shared_ptr<ndn::Data>>& data, uint64_t expire_time_ms)
