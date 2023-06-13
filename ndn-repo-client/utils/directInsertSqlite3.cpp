@@ -7,8 +7,9 @@ NDN_LOG_INIT(ndn_repo_client.directInsert);
 
 DirectInsertSqlite3Client* DirectInsertSqlite3Client::_client=nullptr;
 
-DirectInsertSqlite3Client::DirectInsertSqlite3Client(ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo)
-    :m_segmenter(keyChain, signingInfo)
+DirectInsertSqlite3Client::DirectInsertSqlite3Client(ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo,int cpu_cores)
+    :m_segmenter(keyChain, signingInfo),
+    _threadPool(cpu_cores)
 {
     int rc;
 
@@ -38,17 +39,24 @@ void DirectInsertSqlite3Client::putData(ndn::Name &name_at_repo, std::shared_ptr
     auto current = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch());
     uint64_t expireTime = (uint64_t)current.count()+(uint64_t)freshness_period.count();
     std::vector<std::shared_ptr<ndn::Data>> segments = m_segmenter.segment(tmp,name_at_repo,segment_size, freshness_period);
-    _putMany(segments,expireTime);
-
+    
     // Can comment if there's no local ReadHandle running
     auto _readHandle = ReadHandle::GetExistingEInstance();
     if(_readHandle!=nullptr)
     {
         _readHandle->addToCache(name_at_repo.toUri(),segments);
     }
+
+    boost::asio::post(_threadPool,[this, segments,expireTime](){
+       _putMany(segments,expireTime);
+    });
+    
+    // _putMany(segments,expireTime);
+
+
 }
 
-void DirectInsertSqlite3Client::_putMany(std::vector<std::shared_ptr<ndn::Data>>& _data, uint64_t expire_time_ms)
+void DirectInsertSqlite3Client::_putMany(std::vector<std::shared_ptr<ndn::Data>> _data, uint64_t expire_time_ms)
 {
     std::vector<std::shared_ptr<ndn::Data>> data(_data);
     std::string sql="INSERT OR REPLACE INTO data (key, value, expire_time_ms) VALUES ";//(?, ?, ?)

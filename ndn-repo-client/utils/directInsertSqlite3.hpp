@@ -13,6 +13,9 @@
 #include <ndn-cxx/util/segmenter.hpp>
 #include "ndn-repo-client/utils/ReadHandle.hpp"
 
+#include "boost/asio/thread_pool.hpp"
+#include "boost/asio.hpp"
+
 #include "ndn-cxx/util/sha256.hpp"
 
 class DirectInsertSqlite3Client
@@ -45,7 +48,7 @@ public:
         ndn::time::milliseconds freshness_period=ndn::time::milliseconds(60000));
 
 private:
-    DirectInsertSqlite3Client(ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo);
+    DirectInsertSqlite3Client(ndn::KeyChain& keyChain, const ndn::security::SigningInfo& signingInfo, int cpu_cores=8);
 
     ~DirectInsertSqlite3Client()
     {
@@ -55,13 +58,15 @@ private:
 
     void _put(ndn::span<const uint8_t>& key, ndn::span<const uint8_t>& value, uint64_t expire_time_ms);
 
-    void _putMany(std::vector<std::shared_ptr<ndn::Data>>& data, uint64_t expire_time_ms);
+    void _putMany(std::vector<std::shared_ptr<ndn::Data>> data, uint64_t expire_time_ms);
 
     static DirectInsertSqlite3Client* _client;
 
     sqlite3 *db;
 
     ndn::util::Segmenter m_segmenter;
+
+    boost::asio::thread_pool _threadPool;
 
     
 };
