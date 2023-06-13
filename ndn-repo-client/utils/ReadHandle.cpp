@@ -1,5 +1,4 @@
 #include "ndn-repo-client/utils/ReadHandle.hpp"
-#include "ReadHandle.hpp"
 
 NDN_LOG_INIT(ndn_repo_client.ReadHandle);
 ReadHandle *ReadHandle::_handle = nullptr;
@@ -32,24 +31,40 @@ void ReadHandle::listen(const ndn::Name& prefix)
         });
 }
 
-void ReadHandle::addToCache(std::string filename,std::vector<std::shared_ptr<ndn::Data>> data,int freshness_period)
+void ReadHandle::addToCache(std::string filename,std::vector<std::shared_ptr<ndn::Data>>& data,int freshness_period)
 {   
     // return if alread there
 
     NDN_LOG_INFO(filename << " added to cache : "<<data.size()<<" segments");
     
     std::unordered_set<ndn::Name> _segments_names;
-    _cached_files.insert(filename);
+    {
+            std::lock_guard<std::mutex> lock(_cached_files_mutex);
+            _cached_files.insert(filename);
+    }
+    
     for(auto segment:data)
     {
-        _segments_names.insert(segment->getName());
-        _cache.insert(*segment);
+        {
+            std::lock_guard<std::mutex> lock(_cache_mutex);
+            _segments_names.insert(segment->getName());
+            _cache.insert(*segment);
+        }
+
     }
     _scheduler.schedule(ndn::time::milliseconds(freshness_period), 
         [this, filename, _segments_names] { 
             for(auto name:_segments_names)
-                _cache.erase(name); 
-            _cached_files.erase(filename);
+            {
+                {
+                    std::lock_guard<std::mutex> lock(_cache_mutex);
+                    _cache.erase(name); 
+                }
+            }
+            {
+                std::lock_guard<std::mutex> lock(_cached_files_mutex);
+                _cached_files.erase(filename);
+            }
         });
 
    
@@ -88,12 +103,16 @@ bool ReadHandle::loadFromStorage(const ndn::Interest &interest)
         name=interest.getName();
     }
     // return if alread there
-    if(_cached_files.find(name.toUri())!=_cached_files.end())
     {
-        return false;
-    }else{
-        _cached_files.insert(name.toUri());
+        std::lock_guard<std::mutex> lock(_cached_files_mutex);
+        if(_cached_files.find(name.toUri())!=_cached_files.end())
+        {
+            return false;
+        }else{
+            _cached_files.insert(name.toUri());
+        }
     }
+
 
     // std::string sql="SELECT value FROM data WHERE hex(key) like '?%';";
 
@@ -145,7 +164,7 @@ bool ReadHandle::loadFromStorage(const ndn::Interest &interest)
 		return true;
 	}
 	else{
-		NDN_LOG_ERROR("SQLITE3 ERROR");
+		NDN_LOG_ERROR("SQLITE3 ERROR" << sqlite3_errmsg(db) );
 	}
     sqlite3_finalize(stmt);
 	return false;
@@ -153,6 +172,8 @@ bool ReadHandle::loadFromStorage(const ndn::Interest &interest)
 
 bool ReadHandle::replyFromCache(const ndn::Interest &interest)
 {
+    
+    std::lock_guard<std::mutex> lock(_cache_mutex);
     auto data=_cache.find(interest.getName());
     if(data!=nullptr){
         m_face.put(*data);

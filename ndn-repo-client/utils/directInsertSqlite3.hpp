@@ -13,6 +13,8 @@
 #include <ndn-cxx/util/segmenter.hpp>
 #include "ndn-repo-client/utils/ReadHandle.hpp"
 
+#include "ndn-cxx/util/sha256.hpp"
+
 class DirectInsertSqlite3Client
 {
 public: 
@@ -30,6 +32,12 @@ public:
         if(_client==nullptr){
             _client = new DirectInsertSqlite3Client(keyChain, signingInfo);
         }
+        return _client;
+    }
+
+    // return nullptr if not exist
+    static DirectInsertSqlite3Client *GetExistingInstance()
+    {
         return _client;
     }
 

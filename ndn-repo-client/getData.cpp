@@ -18,9 +18,12 @@ void GetDataClient::fetch_object(ndn::Name name_at_repo, FetchedDataCallback onF
     auto fetcher = ndn_repo_client::SegmentFetcher::start(m_face, ndn::Interest(name_at_repo), 
         ndn::security::v2::getAcceptAllValidator(), options);
 
-    fetcher->onComplete.connect([&,name_at_repo](ndn::ConstBufferPtr data){
-        NDN_LOG_TRACE("Data Fetched : " << name_at_repo.toUri());
-        onFetchedData(ndn::span<const uint8_t>(data->data(),data->size())); 
+    fetcher->onComplete.connect([&,onFetchedData,name_at_repo](ndn::ConstBufferPtr data){
+        ndn::util::Sha256 digest;
+        ndn::span<const uint8_t> dataSpan(data->data(),data->size());
+        digest.update(dataSpan);
+        NDN_LOG_TRACE("Data Fetched : " << name_at_repo.toUri()<<" | bytes: "<<data->size()<<" | sha256: "<<digest.toString());
+        onFetchedData(dataSpan); 
     });
 
     fetcher->onError.connect([&,name_at_repo](auto code,auto msg){

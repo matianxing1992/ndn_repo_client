@@ -12,6 +12,8 @@
 #include <ndn-repo-client/tlv.hpp>
 #include <ndn-repo-client/pubsub.hpp>
 
+#include <ndn-cxx/util/sha256.hpp>
+
 
 using FetchedDataCallback = std::function<void(ndn::span<const uint8_t>)>;
 

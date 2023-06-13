@@ -43,7 +43,7 @@ public:
     
     void listen(const ndn::Name& prefix);
 
-    void addToCache(std::string filename,std::vector<std::shared_ptr<ndn::Data>> data,int freshness_period=60000);
+    void addToCache(std::string filename,std::vector<std::shared_ptr<ndn::Data>>& data,int freshness_period=60000);
 
 private:
     ReadHandle(ndn::Face& face,int cpu_cores,int cache_size);
@@ -65,8 +65,10 @@ private:
 
     int _cache_lifetime_ms;
     std::unordered_set<std::string> _cached_files;
+    std::mutex _cached_files_mutex;
     std::vector<ndn::Interest> _pending_interest;
     ndn::InMemoryStorageFifo _cache;
+    std::mutex _cache_mutex;
 
 };
 

@@ -28,9 +28,16 @@ DirectInsertSqlite3Client::DirectInsertSqlite3Client(ndn::KeyChain& keyChain, co
 
 void DirectInsertSqlite3Client::putData(ndn::Name &name_at_repo, std::shared_ptr<ndn::span<const uint8_t>> object, int segment_size, ndn::time::milliseconds freshness_period)
 {
+    ndn::Buffer buffer(object->begin(),object->end());
+    ndn::span<const uint8_t> tmp(buffer);
+
+    ndn::util::Sha256 digest;
+    digest.update(*object);
+    NDN_LOG_INFO(name_at_repo<<" | bytes: "<<object->size()<<" | sha256: "<<digest.toString());
+
     auto current = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch());
     uint64_t expireTime = (uint64_t)current.count()+(uint64_t)freshness_period.count();
-    auto segments = m_segmenter.segment(*object,name_at_repo,segment_size, freshness_period);
+    std::vector<std::shared_ptr<ndn::Data>> segments = m_segmenter.segment(tmp,name_at_repo,segment_size, freshness_period);
     _putMany(segments,expireTime);
 
     // Can comment if there's no local ReadHandle running
@@ -41,8 +48,9 @@ void DirectInsertSqlite3Client::putData(ndn::Name &name_at_repo, std::shared_ptr
     }
 }
 
-void DirectInsertSqlite3Client::_putMany(std::vector<std::shared_ptr<ndn::Data>>& data, uint64_t expire_time_ms)
+void DirectInsertSqlite3Client::_putMany(std::vector<std::shared_ptr<ndn::Data>>& _data, uint64_t expire_time_ms)
 {
+    std::vector<std::shared_ptr<ndn::Data>> data(_data);
     std::string sql="INSERT OR REPLACE INTO data (key, value, expire_time_ms) VALUES ";//(?, ?, ?)
     for(int i=0;i<data.size();i++){
         sql.append("(?, ?, ?)");
